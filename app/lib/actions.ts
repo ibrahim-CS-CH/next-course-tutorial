@@ -4,6 +4,8 @@ import { sql } from '@vercel/postgres';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
+import { signIn } from '@/auth';
+import { AuthError } from 'next-auth';
 
 export type State = {
   errors?: {
@@ -13,6 +15,26 @@ export type State = {
   };
   message?: string | null;
 };
+
+export async function authenticate(
+  prevState: string | undefined,
+  formDate: FormData,
+) {
+  try {
+    await signIn('credentials', formDate);
+  } catch (error) {
+    if (error instanceof AuthError) {
+      switch (error.type) {
+        case 'CredentialsSignin':
+          return 'Invalid credentials.';
+        default:
+          return 'Somethin went wrong.';
+      }
+    }
+    throw error;
+    console.log(error);
+  }
+}
 
 const FormSchema = z.object({
   id: z.string(),
