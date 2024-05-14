@@ -32,7 +32,6 @@ export async function authenticate(
       }
     }
     throw error;
-    console.log(error);
   }
 }
 
